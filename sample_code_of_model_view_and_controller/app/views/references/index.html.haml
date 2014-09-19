@@ -1,0 +1,86 @@
+.container
+  %h1 References
+  %section
+    %h2 References Status
+    %p #{@references.count} of #{@references.total}
+    %table.table-o-listing
+      %thead
+        %tr
+          %th
+          %th Status
+          %th Name
+          %th Email
+          %th Date
+          %th
+      %tbody
+        - @references.reject(&:new_record?).each_with_index do |reference, index|
+          %tr
+            %td= index + 1
+            %td= reference.status
+            %td= reference.name
+            %td= reference.email
+            %td= reference.created_at.strftime("%b %e, %Y")
+            %th
+              - if reference.received?
+                = link_to "View", "#", data: { "open-modal" => "recevied-reference-#{reference.id}" } 
+                - if current_user.admin?
+                  = link_to "Edit", edit_reference_path(reference, lmname: "edit_reference_#{reference.id}_expert_#{ @references.current_user.try(:id) }")
+              - elsif reference.sent?
+                = link_to "Re-send reference request email", portal_reference_path(reference, applicant_id: (params[:applicant_id] if current_user.admin? && params[:applicant_id]), reference: {resend_email: true}), method: :put
+                - if current_user.admin
+                  = link_to "Copy", "#", class: "copy-text-anchor", data: {txt: eda_url(reference) }
+    .new-reference-form
+      %h2 Request Reference
+      %p Reference #{@references.count + 1} of #{@references.new_total}
+      = form_for [:portal, @references.reference] do |f|
+        = hidden_field_tag :applicant_id, params[:applicant_id] if params[:applicant_id]
+        %div
+          - if @references.reference.errors.any?
+            #error_explanation
+              %h2= "#{pluralize(@references.reference.errors.count, "error")} prohibited this applicant from being saved:"
+              %ul
+                - @references.reference.errors.full_messages.each do |msg|
+                  %li= msg
+        .control-group
+          = f.label nil, "Name"
+          = f.text_field :first_name, placeholder: "First Name", class: "small"
+          = f.text_field :last_name, placeholder: "Last Name", class: "small"
+        .control-group
+          = f.label :email
+          = f.text_field :email
+        .control-group
+          = f.label :phone
+          = f.text_field :phone
+        .control-group
+          = f.label :member_description, "Project Description"
+          = f.text_area :member_description
+        .control-group
+          = f.submit "Request Reference", class: "button"
+          or
+          = link_to "Cancel", :dashboard
+
+- if @references.received.any?
+  - @references.received.each do |ref|
+    .modal{ class: "recevied-reference-#{ref.id}" }
+      .modal-window
+        %button.close{ data: { 'close-modal' => true } } close &times;
+
+        %dl
+          - if ref.answer_1.present?
+            %dt Please describe your project with #{anonymous?(ref.company) ? "Expert ##{ref.company.id}" : ref.company.name}
+            %dd= ref.answer_1
+
+          - if ref.answer_2.present?
+            %dt Did anything challenging or unexpected happen during your project and how was that successfully resolved by #{anonymous?(ref.company) ? "Expert ##{ref.company.id}" : ref.company.name} and their team?
+            %dd= ref.answer_2
+
+          - if ref.answer_3.present?
+            %dt Were you positively surprised by anything (particular to working with #{anonymous?(ref.company) ? "Expert ##{ref.company.id}" : ref.company.name}) during the course of your project?
+            %dd= ref.answer_3
+
+          - if ref.answer_4.present?
+            %dt Is there anything else you&rsquo;d like to say about your experience?
+            %dd= ref.answer_4
+
+        %p
+          #{ref.first_name[0].upcase}.#{ref.last_name? ? "#{ref.last_name[0].upcase}." : ''}
