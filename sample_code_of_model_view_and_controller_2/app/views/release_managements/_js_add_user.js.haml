@@ -1,0 +1,7 @@
+- if params[:pagination]
+  $("#inner_users_list_all").html("#{j render partial: "js_users_listing", locals: {users: @release_manager.paginated_users} }");
+- else
+  $(".close_pop").click()
+  $("body").append("#{ j render partial: "users_select_auto_complete", locals: { users: @release_manager.paginated_users } }");
+  applyAutoComplete( "#{admin_release_managements_path(u_type: params[:u_type], q: params[:q], format: :json)}" )
+applyPOPUPRemover()

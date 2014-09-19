@@ -1,0 +1,23 @@
+%h2 Release Managment
+- %w( expert homeowner ).each do |u_type|
+  - if @release_manager.send("release_management_#{u_type}").any?
+    .table-responsive
+      %h2 #{u_type}
+      %table.table.table-bordered
+        %thead
+          %th
+          - FeatureManagement.send(u_type).order("title ASC").each do |fm|
+            %th= fm
+        - @release_manager.send("release_management_#{u_type}").each do |ru|
+          %tr
+            %td 
+              #{ru.get_uname} (#{ru.id}) #{link_to("Remove", [:admin, ru], remote: true, method: "delete", confirm: "Are you sure?")}
+            - FeatureManagement.send(u_type).order("title ASC").each do |ifm|
+              %td
+                = form_for [:admin, ru], remote: true do |f|
+                  = f.fields_for :users_release_managements_features, build_urm_fields(ru, ifm) do |rmf| 
+                    = rmf.hidden_field :user_id
+                    = rmf.check_box :feature_management_id, { class: "release-management-chkbox", checked: is_user_contains_feature?(ru.user,ifm)}, ifm.id
+  %br/
+  %br/
+  = link_to "Add #{u_type}", admin_release_managements_path(p_type: "add_user", u_type: u_type), class: "add_home", remote: true

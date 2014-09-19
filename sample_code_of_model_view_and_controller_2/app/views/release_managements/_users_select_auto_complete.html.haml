@@ -1,0 +1,15 @@
+.home_popup
+  .home_popup_content
+    %h2 Add #{params[:u_type]}
+    .super_select
+      %input{ type: "text", id: "users_auto_complete" }
+    #selected_users_list
+      = form_for [:admin, ReleaseManagement.new], html: { id: "select_users_submit" }, remote: true do |f|
+        #selected_users_container
+        .inner_select
+          .close_popup (X)
+          #inner_users_list_all
+            = render partial: "js_users_listing", locals: {users: users }
+        .lower
+          = f.submit "Add", data: { disabled_with: "Please wait" }
+          %br.clear/

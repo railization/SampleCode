@@ -1,0 +1,6 @@
+= render "admin/menu"
+%section
+  #release_management_listing
+    = render "listing"
+= content_for :page_header do
+  = stylesheet_link_tag "custom_lib", media: :all

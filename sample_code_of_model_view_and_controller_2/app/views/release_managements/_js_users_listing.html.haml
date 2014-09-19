@@ -1,0 +1,5 @@
+- users.each do |u|
+  .checkit
+    = check_box_tag "tmp_users_id_holder[]", u.id, false, class: "row10 users_check_box", data: { value: u.first_name }
+    %label= u.first_name
+= will_paginate users, page_links: false, next_label: ">", previous_label: "<", params: { pagination: true }
